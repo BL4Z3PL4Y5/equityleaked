@@ -1,0 +1,851 @@
+local old = getrenv().gcinfo
+getrenv().gcinfo = function(...)
+    return 2500;
+end
+
+(function()
+    local real = getrenv().collectgarbage
+    
+    getrenv().collectgarbage = newcclosure(function(...)
+        if checkcaller() and tostring(getcallingscript()) == "Animator" then
+            local func = ...;
+            local con = debug.getconstants(func)
+            if con[1] and con[1]:match("\n") and con[2] and con[2] == "BAC_Client" then
+                return 2500;
+            end
+        end
+    return real(...)
+end)
+end)()
+
+local Players = game:GetService("Players");
+local LocalPlayer = Players.LocalPlayer;
+local Backpack = LocalPlayer.Backpack;
+local LocalCharacter = LocalPlayer.Character;
+local LocalRootPart = Instance;
+local LocalHumanoid = Instance;
+local UI = LocalPlayer:WaitForChild("PlayerGui"):WaitForChild("ScreenGui"):WaitForChild("UI");
+local TargetFrame = UI.Target;
+local TargetVisible = TargetFrame.Visible;
+local TargetText = TargetFrame.TargetText;
+local Target = TargetVisible and Players:FindFirstChild(TargetText.Text);
+local TargetCharacter = Instance;
+local TargetRootPart = Instance;
+_G.TPSilentAimToggle = false
+
+local real = getrenv().gcinfo
+
+getrenv().gcinfo = newcclosure(function(...)
+    return 2500;
+end)
+
+local gmt = getrawmetatable(game)
+local oldindex = gmt.__index
+
+setreadonly(gmt, false)
+
+gmt.__index = newcclosure(function(t, k)
+    if type(t) == "userdata" and oldindex(t, "Name") == "HumanoidRootPart" and k == "Size" then
+        return Vector3.new(2,2,1)
+    end
+    return oldindex(t, k)
+end)
+
+getrenv().gcinfo = newcclosure(function(...)
+    return 2500;
+end)
+
+spawn(function()
+    game:GetService('RunService').RenderStepped:connect(function()
+        for i,v in pairs(game:GetService('Players'):GetPlayers()) do
+            if v.Name ~= game.Players.LocalPlayer.Name then
+                game.Workspace[v.Name].HumanoidRootPart.Size = SizeXCV
+                game.Workspace[v.Name].HumanoidRootPart.Transparency = TransparencyXCV or SizeXCVs
+                game.Workspace[v.Name].HumanoidRootPart.Color = ColourXCV
+                game.Workspace[v.Name].HumanoidRootPart.Material = "ForceField"
+                game.Workspace[v.Name].HumanoidRootPart.CanCollide = false
+                wait()
+            end
+        end
+    end)
+end)
+
+local ScriptConnections = {}
+
+local game=game;
+local workspace=workspace;
+
+local Player = game:GetService("Players").LocalPlayer
+local wS = game:GetService("Workspace")
+
+local FFC = game.FindFirstChild;
+local FFCWhichIsA = game.FindFirstChildWhichIsA;
+local FindPartOnRayWithIgnoreList = workspace.FindPartOnRayWithIgnoreList;
+
+local Players = game:GetService("Players");
+local GetPlayers = Players.GetPlayers;
+local LocalPlayer = Players.LocalPlayer;
+
+local UIS = game:GetService("UserInputService");
+local GML = UIS.GetMouseLocation;
+
+local Camera = workspace.CurrentCamera;
+local WorldToViewportPoint = Camera.WorldToViewportPoint;
+
+local Vector2New = Vector2.new;
+local function SpaceToVector2(Space)
+    local Pos, IsVisible = WorldToViewportPoint(Camera, Space);
+
+    return Vector2New(Pos.X, Pos.Y), IsVisible, Pos.Z;
+end;
+
+local ClosestPlayerToMouse;
+local ClosestPlayerToMouseDistance;
+
+local function GetCharacter(Player)
+    return FFC(workspace, Player.Name);
+end;
+
+local VotePad = workspace.Lobby.VoteStation.pad3.Position;
+table.insert(ScriptConnections, game:GetService("RunService").Stepped:Connect(function()
+    ClosestPlayerToMouseDistance = math.huge;
+    local MouseLocation = GML(UIS);
+    for I, Player in next, GetPlayers(Players) do
+        if typeof(Player) == "Instance" and Player ~= LocalPlayer then
+            local C = GetCharacter(Player);
+            local HRP = C and FFC(C, "HumanoidRootPart");
+            
+            if typeof(HRP) == "Instance" then
+                if FFCWhichIsA(C, "ForceField") --[[or (BarcodeC.IsFreeplay and BarcodeC.FFC(C, "powerup_forcefield"))]] then continue;end;
+                
+                local Distance = (VotePad - HRP.Position).Magnitude;
+                if Distance > 300 then
+                    if ClosestPlayerToMouse then
+                        local V2 = SpaceToVector2(HRP.Position);
+                        local Distance = (MouseLocation - V2).Magnitude;
+                        if Distance < ClosestPlayerToMouseDistance then
+                            ClosestPlayerToMouseDistance = Distance;
+                            ClosestPlayerToMouse = Player;
+                        end;
+                    else
+                        ClosestPlayerToMouse = Player;
+                    end;
+                end;
+            end;
+        end;
+    end;
+end));
+
+local lp = game.Players.LocalPlayer
+local Player = game:GetService("Players").LocalPlayer
+local Camera = game:GetService("Workspace").CurrentCamera
+local Mouse = game:GetService("Players").LocalPlayer:GetMouse()
+FOV_Circle = Drawing.new("Circle")
+FOV_Circle.Color = Color3.fromRGB(255,255,255)
+FOV_Circle.Thickness = 2.5
+FOV_Circle.NumSides = 13
+FOV_Circle.Radius = 100
+FOV_Circle.Visible = false
+FOV_Circle.Filled = false
+
+game:GetService('RunService').Stepped:connect(function()
+    FOV_Circle.Position = Vector2.new(Mouse.X, Mouse.Y + 37)
+end)
+
+
+
+local Core = game:GetService("CoreGui")
+
+Core.ChildAdded:Connect(function(name)
+    wait()
+    local o = name.Name
+    if name.Name == "a" then
+        return
+    else
+        name.Name = "a"
+        name.Parent = game.Workspace
+        local ScreenGui = Instance.new("ScreenGui")
+        local Frame = Instance.new("Frame")
+        ScreenGui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
+        ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+        Frame.Parent = ScreenGui
+        Frame.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+        Frame.Position = UDim2.new(-100000, -100000, -100000, 0)
+        Frame.Size = UDim2.new(0, 100, 0, 100)
+        name.Parent = ScreenGui
+        wait(1)
+        name.Name = o
+        game.Players.LocalPlayer.CharacterRemoving:Connect(function()
+            ScreenGui.Parent = game.Workspace
+        end)
+        game.Players.LocalPlayer.CharacterAdded:Connect(function()
+           ScreenGui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
+        end)
+    end
+end)
+
+local lib = loadstring(game:HttpGet"https://raw.githubusercontent.com/dawid-scripts/UI-Libs/main/Vape.txt")()
+
+local win = lib:Window("Equity PREMIUM Assassin Modification",Color3.fromRGB(255, 182, 193), Enum.KeyCode.RightControl)
+
+local ct = win:Tab("Aim")
+local kt = win:Tab("Knife")
+local hbet = win:Tab("Hitbox")
+local aft = win:Tab("Auto")
+local lpt = win:Tab("Local Player")
+local vt = win:Tab("Visuals")
+local mt = win:Tab("Map Mods")
+local st = win:Tab("Settings")
+
+getgenv().AimLockToggle = false
+ct:Toggle("Aim Lock",false, function(t)
+    getgenv().TPSilentAimToggle = t
+end)
+
+getgenv().TPSilentAimToggle = false
+ct:Toggle("TP-Silent Aim",false, function(t)
+    getgenv().TPSilentAimToggle = t
+end)
+
+getgenv().SilentAimToggle = false
+ct:Toggle("Silent Aim",false, function(t)
+    getgenv().SilentAimToggle = t
+end)
+
+vt:Toggle("Aim FOV",false, function(t)
+    FOV_Circle.Visible = t
+end)
+
+vt:Slider("FOV Size",50,300,100, function(t)
+    FOV_Circle.Radius = t
+end)
+
+vt:Slider("FOV Sides",3,100,13, function(t)
+    FOV_Circle.NumSides = t
+end)
+
+vt:Colorpicker("Colorpicker",Color3.fromRGB(255,0,0), function(t)
+    FOV_Circle.Color = t
+end)
+
+getgenv().AutoThrow = false
+kt:Toggle("Auto Throw",false, function(t)
+    getgenv().AutoThrow = t
+end)
+
+
+getgenv().TPAutoThrow = false
+kt:Toggle("TP Auto Throw",false, function(t)
+    getgenv().TPAutoThrow = t
+end)
+
+getgenv().StabAura = false
+kt:Toggle("Stab Aura",false, function(t)
+    getgenv().StabAura = t
+end)
+
+getgenv().AutoEquipToggle = false
+kt:Toggle("Auto Equip",false, function(t)
+    getgenv().AutoEquipToggle = t
+end)
+
+getgenv().AutoFarmToggle = false
+aft:Toggle("TP Auto Farm",false, function(t)
+    getgenv().AutoFarmToggle = t
+end)
+
+do
+    local function characterAdded(Character)
+        if typeof(Character) ~= "Instance" then return;end;
+        LocalCharacter = Character;
+        LocalRootPart = Character:WaitForChild("HumanoidRootPart");
+        LocalHumanoid = Character:WaitForChild("Humanoid");
+    end;
+    characterAdded(LocalCharacter);
+    LocalPlayer.CharacterAdded:Connect(characterAdded);
+end;
+
+TargetFrame.Changed:Connect(function()
+    TargetVisible = TargetFrame.Visible;
+end);
+TargetText.Changed:Connect(function()
+    Target = Players:FindFirstChild(TargetText.Text);
+end);
+
+local VotePad = workspace.Lobby.VoteStation.pad3.Position;
+local function getClosestPlayer()
+    local Closest = Instance;
+    local MaxDistance = number;
+
+    for I, Player in next, Players:GetPlayers() do
+        if Player ~= LocalPlayer and LocalRootPart then
+            local Character = workspace:FindFirstChild(Player.Name);
+            local RootPart = Character and Character:FindFirstChild("HumanoidRootPart");
+            local Humanoid = RootPart and Character:FindFirstChild("Humanoid");
+
+            if Humanoid and Humanoid.Health > 0 then
+                local Distance = (VotePad - RootPart.Position).Magnitude;
+                if Distance > 300 then
+                    Distance = (LocalRootPart.Position - RootPart.Position).Magnitude;
+                    if Closest then
+                        if Distance < MaxDistance then
+                            Closest = Player;
+                            MaxDistance = Distance;
+                        end;
+                    else
+                        Closest = Player;
+                        MaxDistance = Distance;
+                    end;
+                end;
+            end;
+        end;
+    end;
+
+    return Closest, MaxDistance;
+end;
+local ClosestPlayer = Instance;
+local ClosestPlayerCharacter = Instance;
+local ClosestPlayerRootPart = Instance;
+
+local HitCheckCooldown = false;
+local HitCheck = LocalPlayer:WaitForChild("PlayerScripts"):WaitForChild("localknifehandler"):WaitForChild("HitCheck");
+local ThrowKnife = game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("ThrowKnife");
+
+local ThrowCooldown = false;
+local ThrowCFrame = CFrame.new(0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1);
+
+local TPTweenInfo = TweenInfo.new(0, Enum.EasingStyle.Linear, Enum.EasingDirection.Out);
+local TPOffset = CFrame.new(0, -30, 10);
+
+local TweenService = game:GetService("TweenService");
+shared.n2autofarm = game:GetService("RunService").Heartbeat:Connect(function()
+    ClosestPlayer = getClosestPlayer();
+    ClosestPlayerCharacter = ClosestPlayer and workspace:FindFirstChild(ClosestPlayer.Name);
+    ClosestPlayerRootPart = ClosestPlayerCharacter and ClosestPlayerCharacter:FindFirstChild("HumanoidRootPart");
+    
+    -- print(TargetVisible, Target, LocalCharacter, LocalRootPart, LocalHumanoid);
+    if getgenv().AutoFarmToggle == true and TargetVisible and Target and LocalCharacter and LocalRootPart and LocalHumanoid then
+        TargetCharacter = workspace:FindFirstChild(Target.Name);
+        TargetRootPart = TargetCharacter and TargetCharacter:FindFirstChild("HumanoidRootPart");
+
+        if TargetRootPart then            
+            if not LocalCharacter:FindFirstChild("Knife") then
+                --Auto Equip
+                local Knife = LocalPlayer.Backpack:FindFirstChild"Knife";
+                if Knife then
+                    print"equipping";
+                    LocalHumanoid:EquipTool(Knife);
+                end;
+            end;
+            if LocalCharacter:FindFirstChild("Knife") then
+                if not HitCheckCooldown and (LocalRootPart.Position - TargetRootPart.Position).Magnitude <= 6.5 then
+                    --Stab Aura
+                    print"stabbing";
+                    HitCheck:Fire(Target);
+                    HitCheckCooldown = true;
+                    task.spawn(function()
+                        task.wait(0.4);
+                        HitCheckCooldown = false;
+                    end);
+                end;
+                --Throw Aura
+                if not ThrowCooldown then
+                    ThrowCooldown = true;
+                    task.spawn(function()
+                        task.wait(0.3);
+                        if TargetRootPart then
+                            ThrowKnife:FireServer(TargetRootPart.Position, 0, ThrowCFrame);
+                            task.wait(0.1);
+                            print"unequipping";
+                            LocalHumanoid:UnequipTools();
+                        end;
+
+                        task.wait(1);
+                        ThrowCooldown = false;
+                    end);
+                end;
+            end;
+
+            --Teleport
+            LocalHumanoid:ChangeState(11);
+            TweenService:Create(
+                LocalRootPart,
+                TPTweenInfo,
+                {CFrame = TargetRootPart.CFrame * TPOffset}
+            ):Play();
+        end;
+    end;
+end);
+
+local player = game:GetService("Players").LocalPlayer
+local UserInputService = game:GetService("UserInputService")
+local mouse = player:GetMouse()
+
+getgenv().infjumptoggle = false
+lpt:Toggle("Infinite Jump",false, function(t)
+    infjumptoggle = t
+end)
+
+task.spawn(function()
+    game:GetService("UserInputService").JumpRequest:Connect(function()
+        if infjumptoggle then
+            game:GetService"Players".LocalPlayer.Character:FindFirstChildOfClass'Humanoid':ChangeState("Jumping")
+        end
+    end)
+end)
+
+getgenv().nocliptoggle = false
+lpt:Toggle("Noclip",false, function(t)
+    nocliptoggle = t
+end)
+
+task.spawn(function()
+    game.RunService.Stepped:connect(function()
+        char = game.Players.LocalPlayer.Character 
+        for _,v in pairs(char:children()) do 
+            pcall(function() if nocliptoggle == true and v.className == "Part" then v.CanCollide = false elseif v.ClassName == "Model" then
+            v.Head.CanCollide = false end end) 
+        end 
+        game:service("RunService").Stepped:wait()
+    end)
+end)
+
+getgenv().clicktptoggle = false
+lpt:Toggle("Ctrl Click TP",false, function(t)
+    clicktptoggle = t
+end)
+
+task.spawn(function()
+    repeat wait() until mouse
+    UserInputService.InputBegan:Connect(function(input, gameProcessed)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 and UserInputService:IsKeyDown(Enum.KeyCode.LeftControl) and clicktptoggle then
+            player.Character:MoveTo(Vector3.new(mouse.Hit.x, mouse.Hit.y, mouse.Hit.z))
+        end
+    end)
+end)
+
+_G.WalkSpeed = false
+
+lpt:Toggle("Custom WalkSpeed",false, function(t)
+    _G.WalkSpeed = t
+end)
+
+local SpeedValue = 16
+
+lpt:Slider("WalkSpeed",16,100,16, function(t)
+    SpeedValue = t
+end)
+
+task.spawn(function()
+    game.RunService.Stepped:connect(function()
+        if _G.WalkSpeed == true then
+            game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = SpeedValue
+        else
+            game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = 16
+        end
+    end)
+end)
+
+_G.JumpPower = false
+
+lpt:Toggle("Custom JumpPower",false, function(t)
+    _G.JumpPower = t
+end)
+
+local JumpValue = 50
+
+lpt:Slider("JumpPower",50,250,50, function(t)
+    JumpValue = t
+end)
+
+task.spawn(function()
+    game.RunService.Stepped:connect(function()
+        if _G.JumpPower == true then
+            game.Players.LocalPlayer.Character.Humanoid.JumpPower = JumpValue
+        else
+            game.Players.LocalPlayer.Character.Humanoid.JumpPower = 50
+        end
+    end)
+end)
+
+_G.FieldOfView = false
+
+lpt:Toggle("Custom FOV",false, function(t)
+    _G.FieldOfView = t
+end)
+
+local FOVValue = 70
+
+lpt:Slider("FOV",70,150,70, function(t)
+    FOVValue = t
+end)
+
+task.spawn(function()
+    game.RunService.Stepped:connect(function()
+        if _G.FieldOfView == true then
+            game.workspace.CurrentCamera.FieldOfView = FOVValue
+        else
+            game.workspace.CurrentCamera.FieldOfView = 70
+        end
+    end)
+end)
+
+_G.HipHeight = false
+
+lpt:Toggle("Custom HipHeight",false, function(t)
+    _G.HipHeight = t
+end)
+
+local HeightValue = 0
+
+lpt:Slider("HipHeight",0,20,0, function(t)
+    HeightValue = t
+end)
+
+task.spawn(function()
+    game.RunService.Stepped:connect(function()
+        if _G.HipHeight == true then
+            game.Players.LocalPlayer.Character.Humanoid.HipHeight = HeightValue
+        else
+            game.Players.LocalPlayer.Character.Humanoid.HipHeight = 0
+        end
+    end)
+end)
+
+_G.Gravity = false
+
+lpt:Toggle("Custom Gravity",false, function(t)
+    _G.Gravity = t
+end)
+
+local GravityValue = 192.6
+
+lpt:Slider("Gravity",0,192.6,192.6, function(t)
+    GravityValue = t
+end)
+
+task.spawn(function()
+    game.RunService.Stepped:connect(function()
+        if _G.Gravity == true then
+            game.workspace.Gravity = GravityValue
+        else
+            game.workspace.Gravity = 192.6
+        end
+    end)
+end)
+
+st:Colorpicker("Change UI Color",Color3.fromRGB(255, 182, 193), function(t)
+lib:ChangePresetColor(Color3.fromRGB(t.R * 255, t.G * 182, t.B * 193))
+end)
+
+mt:Button("Remove Textures", function(t)
+    local hasProperty = function(a, b)
+        local c = a[b];
+    end
+    
+    task.spawn(function()
+        for i, v in next, workspace:GetDescendants() do
+            local Check = pcall(function()hasProperty(v, "Material")end)
+            
+            if Check then
+                v.Material = "Plastic";
+            end
+        end
+        
+        workspace.DescendantAdded:Connect(function(v)
+            local Check = pcall(function()hasProperty(v, "Material")end)
+            
+            if Check then
+                v.Material = "Plastic";
+            end
+        end)
+    end)
+end)
+
+mt:Button("Destroy Map", function(t)
+    game.Workspace.GameMap:Destroy()
+end)
+
+mt:Button("Roblox Shaders", function(t)
+    loadstring(game:HttpGet("https://raw.githubusercontent.com/helloDelvuss/NIGGARTX/main/EZRTX",true))();
+end)
+
+getgenv().HBEToggle = false
+hbet:Toggle("Hitbox Expander",false, function(t)
+    getgenv().HBEToggle = t
+end)
+
+spawn(function()
+    game:GetService('RunService').RenderStepped:connect(function()
+        if getgenv().HBEToggle == true then
+    	    getgenv().OFFON = true
+    	    getgenv().ReSizeXCV = getgenv().SizeXCV
+    	    getgenv().TransparencyXCV = 0
+    	    getgenv().ColourXCV = Color3.fromRGB(255, 0, 255)
+        else
+        	if getgenv().HBEToggle == false then
+    	       getgenv().OFFON = false
+    	       getgenv().SizeXCVs = Vector3.new(10,10,10)
+    	       getgenv().TransparencyXCV = 1
+    	       getgenv().ColourXCV = Color3.fromRGB(255, 0, 255)
+    	    end
+        end
+    end)
+end)
+
+hbet:Slider("Hitbox Size",7,75,15, function(t)
+    if getgenv().OFFON == true then do
+		getgenv().SizeXCV = Vector3.new(t,t,t)
+		getgenv().ReSizeXCV = SizeXCV
+    end
+	end
+end)
+
+hbet:Colorpicker("Colorpicker",Color3.fromRGB(255,0,0), function(t)
+    getgenv().ColourXCV = t
+end)
+
+task.spawn(function()
+    game.RunService.Stepped:connect(function()
+        local plrcount = 0 
+        for i,v in pairs(game.Players:GetChildren()) do
+            if v:IsA("Player") then 
+               plrcount = plrcount+1 
+            end
+        end
+        
+        if getgenv().AutoFarmToggle == true and plrcount <4 then
+            game:GetService("TeleportService"):Teleport(game.PlaceId, game:GetService("Players").LocalPlayer)
+        end
+    end)
+end)
+
+getgenv().AutoFarm = false
+aft:Toggle("Auto Farm - ADDING",false, function(t)
+    getgenv().AutoFarm = t
+end)
+
+getgenv().AutoCandyToggle = false
+aft:Toggle("Auto Candy",false, function(t)
+    getgenv().AutoCandyToggle = t
+end)
+
+getgenv().GhostFarmToggle = false
+aft:Toggle("Ghost Farm",false, function(t)
+    getgenv().GhostFarmToggle = t
+end)
+
+game.Players.LocalPlayer.CharacterAdded:connect(function()
+    if getgenv().GhostFarmToggle == true then
+        game.ReplicatedStorage.Remotes.RequestGhostSpawn:InvokeServer()
+    
+        task.spawn(function()
+            game.RunService.Stepped:connect(function()
+                for i,v in pairs(game.Workspace.GhostCoins:GetDescendants()) do
+                    if v:IsA"TouchTransmitter" then
+                        firetouchinterest(game.Players.LocalPlayer.Character.HumanoidRootPart, v.Parent, 0) 
+                        task.wait()
+                        firetouchinterest(game.Players.LocalPlayer.Character.HumanoidRootPart, v.Parent, 1)
+                    end
+                end
+            end)
+        end)
+    end
+end)
+
+task.spawn(function()
+    game.RunService.Stepped:connect(function()
+        if getgenv().AutoCandyToggle == true then
+            for i,v in pairs(game.Workspace.EventCurrency:GetDescendants()) do
+                if v:IsA"TouchTransmitter" then
+                    firetouchinterest(game.Players.LocalPlayer.Character.HumanoidRootPart, v.Parent, 0) 
+                    task.wait()
+                    firetouchinterest(game.Players.LocalPlayer.Character.HumanoidRootPart, v.Parent, 1)
+                end
+            end
+        end
+    end)
+end)
+
+task.spawn(function()
+    game.RunService.Stepped:connect(function()
+        if getgenv().AutoFarmToggle == true then
+            workspace.Gravity = -2;
+        end
+        
+        if getgenv().AutoFarmToggle == false then
+            workspace.Gravity = 196.2;
+        end
+    end)
+end)
+
+task.spawn(function()
+    game.RunService.Stepped:connect(function()
+        if getgenv().AutoEquipToggle == true then
+            game.Players.LocalPlayer.Character.Humanoid:EquipTool(Game.Players.LocalPlayer.Backpack.Knife)
+        end
+    end)
+end)
+
+local ClosestPlayer = function()
+    local Closest = nil
+    local Distance = 9e9
+
+    for i, v in next, game:GetService("Players"):GetPlayers() do
+        if v.Name ~= Player.Name then
+            if wS[v.Name] and wS[v.Name]:FindFirstChild("Humanoid") and wS[v.Name]:FindFirstChild("Humanoid").Health ~= 0 then
+                local Magnitude = (Player.Character.Head.Position - wS[v.Name].Head.Position).Magnitude
+                if Magnitude < Distance then
+                    Closest = wS[v.Name]
+                    Distance = Magnitude
+                end
+            end
+        end
+    end
+    return Closest
+end
+
+local cooldown = false
+
+spawn(function()
+    game:GetService("RunService").Heartbeat:connect(function()
+        if getgenv().StabAura == true and Player.Character and not cooldown then
+            if Player:DistanceFromCharacter(ClosestPlayer().Head.Position) <= 10 then
+                Player.PlayerScripts.localknifehandler.HitCheck:Fire(ClosestPlayer())
+                coroutine.wrap(function()
+                    cooldown = true;
+                    task.wait(.7)
+                    cooldown = false;
+                end)();
+            else
+                task.wait()
+            end
+        end
+    end)
+end)
+
+local oldnc;
+oldnc = hookmetamethod(game, "__namecall", newcclosure(function(self, ...)
+    if _G.TPSilentAimToggle == true and getnamecallmethod() == "FindPartOnRayWithIgnoreList" and self == game.Workspace then
+        local camera = game.Workspace.CurrentCamera.CFrame.Position
+        local pos = game.Workspace[ClosestPlayerToMouse.Name].HumanoidRootPart
+        local n = Vector3.new(pos.Position)
+        return pos, n
+    end
+    return oldnc(self, ...)
+end));
+
+game:GetService("UserInputService").InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 and getgenv().SilentAimToggle == true then
+        
+        task.wait(.35);
+    
+        local function ClosestPlayerToCursor()
+            local Closest = nil;
+            local Distance = 9e9;
+            for i, v in pairs(game:GetService("Players"):GetPlayers()) do
+                if v ~= Player then
+                    if Workspace[v.Name]:FindFirstChild("Humanoid") and Workspace[v.Name].Humanoid.Health ~= 0 then
+                        local Position = Camera:WorldToViewportPoint(Workspace[v.Name].HumanoidRootPart.Position);
+                        local Magnitude = (Vector2.new(Position.X, Position.Y) - Vector2.new(Mouse.X, Mouse.Y)).Magnitude;
+                        if Magnitude < Distance and Magnitude < FOV_Circle.Radius then
+                            Closest = workspace[v.Name];
+                            Distance = Magnitude;
+                        end
+                    end
+                end
+            end
+            return Closest
+        end
+
+        local ThrowAtTarget = function(args1, args2, args3)
+            return game:GetService("ReplicatedStorage").Remotes.ThrowKnife:FireServer(args1,args2,args3);
+        end
+        
+        ThrowAtTarget(workspace[ClosestPlayerToCursor().Name].Head.Position, 0, CFrame.new());
+        
+    end
+end)
+
+spawn(function()
+    game:GetService('RunService').RenderStepped:connect(function()
+        pcall(function()
+            if getgenv().SilentAimToggle then
+                for i, v in pairs(game:GetService("Workspace").KnifeHost:GetDescendants()) do
+                    if v:IsA("Part") then
+                        if v.Archivable == true then
+                            local PlayerPosition = ClosestPlayerToCursor().baseHitbox.CFrame
+                            v.CFrame = PlayerPosition
+                        end
+                    end
+                end
+            end
+        end)
+    end)
+end)
+
+game:GetService('RunService').RenderStepped:connect(function()
+    if TargetVisible and Target and LocalCharacter and LocalRootPart and LocalHumanoid and getgenv().AutoThrow == true then
+        TargetCharacter = game.Workspace:FindFirstChild(Target.Name);
+        TargetRootPart = TargetCharacter and TargetCharacter:FindFirstChild("HumanoidRootPart");
+        
+        if TargetRootPart then
+            if not LocalCharacter:FindFirstChild("Knife") then
+                local Knife = LocalPlayer:FindFirstChild("Knife");
+                if Knife then
+                    LocalCharacter.Humanoid:EquipTool(Knife);
+                end;
+            end;
+        end;
+        
+        if not ThrowCooldown then
+            ThrowCooldown = true;
+            task.spawn(function()
+                task.wait(0.1);
+                ThrowCooldown = false;
+                if TargetRootPart then
+                    ThrowKnife:FireServer(TargetRootPart.Position, 0, ThrowCFrame);
+                end
+            end)
+        end
+    end
+end)
+
+
+game:GetService('RunService').RenderStepped:connect(function()
+    if TargetVisible and Target and LocalCharacter and LocalRootPart and LocalHumanoid and getgenv().TPAutoThrow == true then
+        TargetCharacter = game.Workspace:FindFirstChild(Target.Name);
+        TargetRootPart = TargetCharacter and TargetCharacter:FindFirstChild("HumanoidRootPart");
+        
+        if TargetRootPart then
+            if not LocalCharacter:FindFirstChild("Knife") then
+                local Knife = LocalPlayer:FindFirstChild("Knife");
+                if Knife then
+                    LocalCharacter.Humanoid:EquipTool(Knife);
+                end;
+            end;
+        end;
+        
+        if not ThrowCooldown then
+            ThrowCooldown = true;
+            task.spawn(function()
+                task.wait(0.1);
+                ThrowCooldown = false;
+                if TargetRootPart then
+                    ThrowKnife:FireServer(TargetRootPart.Position, 0, ThrowCFrame);
+                end
+            end)
+        end
+    end
+end)
+
+local oldnc;
+    oldnc = hookmetamethod(game, "__namecall", newcclosure(function(self, ...)
+    if getnamecallmethod() == "FindPartOnRayWithIgnoreList" and self == game.Workspace and getgenv().TPAutoThrow == true then
+        local camera = game.Workspace.CurrentCamera.CFrame.Position
+        local pos = game.Workspace[ClosestPlayerToMouse.Name].HumanoidRootPart
+        local n = Vector3.new(pos.Position)
+        return pos, n
+    end
+    return oldnc(self, ...)
+end));
